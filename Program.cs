@@ -4,14 +4,15 @@ using System.Diagnostics;
 namespace Queens;
 
 class Program
+
 {   // List of all Manual reset events being created
-    public static List<ManualResetEvent> mres;
+    public  List<ManualResetEvent> mres;
     // Delegate to be used to pass the backtracking method to threads
     public delegate void Del((List<int>, Dictionary<int, HashSet<int>>)? objects);
     
-    public static Del method;
+    public  Del method;
     //Completed puzzle
-    public static List<int>? poss;
+    public  List<int>? poss;
 
 /// <summary>
 /// Counts the number of conflicts in a state
@@ -96,7 +97,7 @@ class Program
     /// <param name="state">Queen Puzzle state</param>
     /// <param name="options">All the options that this queen puzzle state can become </param>
     /// <returns>Not supposed to return anything</returns>
-    public static List<int>? Complete(List<int> state, Dictionary<int, HashSet<int>> options)
+    public List<int>? Complete(List<int> state, Dictionary<int, HashSet<int>> options)
     {
         // If we have no more options then we have a completed state
         if (options.Count == 0)
@@ -180,7 +181,7 @@ class Program
 
     }
     
-    public static (List<int>, Dictionary<int, HashSet<int>>) Create(int n)
+    public  (List<int>, Dictionary<int, HashSet<int>>) Create(int n)
     {
         List<int> ret1 = new List<int>();
         Dictionary<int, HashSet<int>> r2 = new Dictionary<int, HashSet<int>>();
@@ -208,7 +209,7 @@ class Program
     /// Void Method of complete to be able to pass to the threadpool
     /// </summary>
     /// <param name="objects"></param>
-    private static void  Complete2((List<int>, Dictionary<int, HashSet<int>>)? objects)
+    private  void  Complete2((List<int>, Dictionary<int, HashSet<int>>)? objects)
     {
         var (state, options) = (ValueTuple<List<int>, Dictionary<int, HashSet<int>>>)objects!;
 
@@ -216,7 +217,7 @@ class Program
         return;
     }
 
-    private static List<int> copy_state(List<int> x)
+    private  List<int> copy_state(List<int> x)
     {
         List<int> ret = new List<int>();
         foreach (var va in x)
@@ -232,7 +233,7 @@ class Program
     /// <param name="state"></param>
     /// <param name="options"></param>
     /// <param name="method"></param>
-    public static void Start(List<int> state, Dictionary<int, HashSet<int>> options, Del method)
+    public void Start(List<int> state, Dictionary<int, HashSet<int>> options, Del method)
     {
         //How many queens there are
         int n = state.Count;
@@ -277,26 +278,33 @@ class Program
 
 
     }
-    
-    static void Main(string[] args)
+
+
+    private ManualResetEvent[] need(List<ManualResetEvent> mre2, int bound)
     {
-
-        mres = new List<ManualResetEvent>();
-
-        method = Complete2;
-        
-        var (state, opt) = Create(400);
-        Start(state, opt, method);
-        // Need to batch the queue
-        while (poss == null)
+        int i = 0;
+        ManualResetEvent[] ret = new ManualResetEvent[bound];
+        Random ran = new Random();
+        while (i < bound)
         {
-            int sync = WaitHandle.WaitAny(mres.ToArray()); 
-            mres.Remove(mres[sync]);
-            //
-            
+            ret[i] = mre2[ran.Next(mre2.Count)];
+            i++;
         }
 
-        Console.WriteLine(h(poss));
+        return ret;
+    }
+    static void Main(string[] args)
+    {
+        Program Queen = new Program();
+        Queen.mres = new List<ManualResetEvent>();
+
+        Queen.method = new Program().Complete2;
+        var (state, options) = Queen.Create(300);
+        Queen.Complete(state, options);
+        Console.WriteLine(h(Queen.poss));
+
+
+
 
 
 
