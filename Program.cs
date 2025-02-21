@@ -261,6 +261,7 @@ class Program
                     (ValueTuple<List<int>, Dictionary<int, HashSet<int>>, ManualResetEvent>)obj!;
                 method((state, options));
                 mre.Set();
+               
 
 
             }, input);
@@ -298,10 +299,9 @@ class Program
         Program Queen = new Program();
         Queen.mres = new List<ManualResetEvent>();
 
-        Queen.method = new Program().Complete2;
-        var (state, options) = Queen.Create(300);
-        Queen.Complete(state, options);
-        Console.WriteLine(h(Queen.poss));
+       Del method = new Program().Complete2;
+        var (state, options) = Queen.Create(50);
+        Queen.Start(state,options,method);
 
 
 
